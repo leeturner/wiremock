@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
   <properties>
-    <slf4jversion>1.7.1</slf4jversion>
+    <slf4jversion>1.7.36</slf4jversion>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.resources.sourceEncoding>UTF-8</project.resources.sourceEncoding>
