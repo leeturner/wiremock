@@ -99,6 +99,26 @@ public class ResponseDefinitionTest {
     assertThat(responseDef.getJsonBody(), is(jsonNode));
   }
 
+  private static final String ENRICHED_BODY =
+      "{   							        	\n"
+          + "		\"status\": 200,   			\n"
+          + "		\"body\": {          		\n"
+          + "			\"encoding\": \"text\",	\n"
+          + "			\"format\": \"json\",	\n"
+          + "			\"compression\": \"gzip\",	\n"
+          + "			\"dataStore\": \"files\",	\n"
+          + "			\"dataRef\": \"/path/to/my.data.json\",	\n"
+            + "			\"data\": \"My Response Data\"	\n"
+          + "       }                     		\n"
+          + "}											";
+
+  @Test
+  public void correctlyUnmarshalsFromEnrichedBody() {
+    ResponseDefinition responseDef = Json.read(ENRICHED_BODY, ResponseDefinition.class);
+    assertThat(responseDef.getBase64Body(), is(nullValue()));
+    assertThat(responseDef.getBody(), is("My Response Data"));
+  }
+
   @Test
   public void correctlyMarshalsToJsonWhenBodyIsAString() throws Exception {
     ResponseDefinition responseDef =
