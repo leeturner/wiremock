@@ -56,11 +56,47 @@ public class ResponseDefinition {
   private Boolean wasConfigured = true;
   private Request originalRequest;
 
+  public ResponseDefinition(
+          int status,
+          String statusMessage,
+          String body,
+          JsonNode jsonBody,
+          String base64Body,
+          String bodyFileName,
+          HttpHeaders headers,
+          HttpHeaders additionalProxyRequestHeaders,
+          Integer fixedDelayMilliseconds,
+          DelayDistribution delayDistribution,
+          ChunkedDribbleDelay chunkedDribbleDelay,
+          String proxyBaseUrl,
+          String proxyUrlPrefixToRemove,
+          Fault fault,
+          List<String> transformers,
+          Parameters transformerParameters,
+          Boolean wasConfigured) {
+    this(
+        status,
+        statusMessage,
+        Body.fromOneOf(null, body, jsonBody, base64Body),
+        bodyFileName,
+        headers,
+        additionalProxyRequestHeaders,
+        fixedDelayMilliseconds,
+        delayDistribution,
+        chunkedDribbleDelay,
+        proxyBaseUrl,
+        proxyUrlPrefixToRemove,
+        fault,
+        transformers,
+        transformerParameters,
+        wasConfigured);
+  }
+  
   @JsonCreator
   public ResponseDefinition(
       @JsonProperty("status") int status,
       @JsonProperty("statusMessage") String statusMessage,
-      @JsonProperty("body") String body,
+      @JsonProperty("body") ResponseBody body,
       @JsonProperty("jsonBody") JsonNode jsonBody,
       @JsonProperty("base64Body") String base64Body,
       @JsonProperty("bodyFileName") String bodyFileName,
@@ -78,7 +114,8 @@ public class ResponseDefinition {
     this(
         status,
         statusMessage,
-        Body.fromOneOf(null, body, jsonBody, base64Body),
+        Body.fromResponseBody(body),
+//        Body.fromOneOf(null, body.toString(), jsonBody, base64Body),
         bodyFileName,
         headers,
         additionalProxyRequestHeaders,

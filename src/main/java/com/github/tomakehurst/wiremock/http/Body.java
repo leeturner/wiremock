@@ -61,6 +61,16 @@ public class Body {
     json = true;
   }
 
+  static Body fromResponseBody(ResponseBody responseBody) {
+    System.out.println(responseBody);
+    if (responseBody instanceof StringResponseBody) {
+      return Body.fromString(((StringResponseBody) responseBody).getValue());
+    } else if (responseBody instanceof EnrichedResponseBody) {
+      return Body.fromString(((EnrichedResponseBody) responseBody).getData());
+    }
+    return Body.EMPTY_BODY;
+  }
+  
   static Body fromBytes(byte[] bytes) {
     return bytes != null ? new Body(bytes) : none();
   }
