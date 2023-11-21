@@ -215,7 +215,7 @@ public class ResponseDefinition {
         null,
         null,
         null,
-        Collections.<String>emptyList(),
+        Collections.emptyList(),
         Parameters.empty(),
         true);
   }
@@ -234,7 +234,7 @@ public class ResponseDefinition {
         null,
         null,
         null,
-        Collections.<String>emptyList(),
+        Collections.emptyList(),
         Parameters.empty(),
         true);
   }
@@ -253,7 +253,7 @@ public class ResponseDefinition {
         null,
         null,
         null,
-        Collections.<String>emptyList(),
+        Collections.emptyList(),
         Parameters.empty(),
         true);
   }
