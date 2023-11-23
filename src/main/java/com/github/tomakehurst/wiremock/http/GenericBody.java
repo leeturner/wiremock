@@ -19,6 +19,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = StringResponseBody.class)
-@JsonSubTypes({@Type(StringResponseBody.class), @Type(EnrichedResponseBody.class)})
-public interface ResponseBody {}
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = StringBody.class)
+@JsonSubTypes(value = {@Type(StringBody.class), @Type(EnrichedBody.class)})
+public abstract class GenericBody {}

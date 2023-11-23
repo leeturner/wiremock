@@ -18,11 +18,11 @@ package com.github.tomakehurst.wiremock.http;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public class StringResponseBody implements ResponseBody {
+public class StringBody extends GenericBody {
   private final String value;
 
   @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-  public StringResponseBody(String v) {
+  public StringBody(String v) {
     value = v;
   }
 
