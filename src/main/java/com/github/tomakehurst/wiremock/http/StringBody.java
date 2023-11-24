@@ -18,7 +18,7 @@ package com.github.tomakehurst.wiremock.http;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public class StringBody extends GenericBody {
+public class StringBody extends Entity {
   private final String value;
 
   @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

@@ -19,7 +19,7 @@ import static java.util.Arrays.asList;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EnrichedBody extends GenericBody {
+public class EnrichedBody extends Entity {
   private final EncodingType encoding;
   private final FormatType format;
   private final CompressionType compression;
@@ -28,12 +28,11 @@ public class EnrichedBody extends GenericBody {
   private final Object data;
 
   public EnrichedBody(
-      @JsonProperty("encoding") EncodingType encoding, // text, binary
+      @JsonProperty("encoding") EncodingType encoding,
       @JsonProperty("format") FormatType format,
-      @JsonProperty("compression") CompressionType compression, // none, brotli, gzip, deflate
-      @JsonProperty("dataStore")
-          String dataStore, // none, file, db - validate and needs to be templatable
-      @JsonProperty("dataRef") String dataRef, // and needs to be templatable
+      @JsonProperty("compression") CompressionType compression,
+      @JsonProperty("dataStore") String dataStore, // validate and needs to be templatable
+      @JsonProperty("dataRef") String dataRef, // needs to be templatable
       @JsonProperty("data") Object data) {
     // default the encoding to text if not specified or not valid
     this.encoding = asList(EncodingType.values()).contains(encoding) ? encoding : EncodingType.TEXT;
@@ -45,6 +44,8 @@ public class EnrichedBody extends GenericBody {
     this.dataStore = dataStore;
     this.dataRef = dataRef;
     this.data = data;
+    
+    // TODO: do we want to override the format based on what we know we have parsed?
   }
 
   public EncodingType getEncoding() {

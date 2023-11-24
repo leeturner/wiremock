@@ -21,4 +21,4 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = StringBody.class)
 @JsonSubTypes(value = {@Type(StringBody.class), @Type(EnrichedBody.class)})
-public abstract class GenericBody {}
+public abstract class Entity {}
