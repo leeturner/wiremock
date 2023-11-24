@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.github.tomakehurst.wiremock.common.Json;
 import java.util.Base64;
+import java.util.HashMap;
 import org.junit.jupiter.api.Test;
 
 class BodyTest {
@@ -73,6 +74,74 @@ class BodyTest {
     final JsonNode jsonContent = Json.node("{\"name\":\"wiremock\",\"isCool\":true}");
     Body body = Body.fromOneOf(null, null, jsonContent, "lskdjflsjdflks");
 
+    assertThat(body.asJson(), is(jsonContent));
+  }
+
+  @Test
+  void responseBodyConstructsFromBase64() {
+    byte[] base64Encoded = Base64.getEncoder().encodeToString("this content".getBytes()).getBytes();
+    String encodedText = stringFromBytes(base64Encoded);
+    Body body = Body.fromEntity(null, null, encodedText);
+
+    assertThat(body.asString(), is("this content"));
+    assertThat(body.isBinary(), is(true));
+    assertThat(body.isJson(), is(false));
+  }
+
+  @Test
+  void responseBodyConstructsFromJson() {
+    final JsonNode jsonContent = Json.node("{\"name\":\"wiremock\",\"isCool\":true}");
+    Body body = Body.fromEntity(null, jsonContent, "lskdjflsjdflks");
+
+    assertThat(body.asJson(), is(jsonContent));
+  }
+
+  @Test
+  void responseBodyConstructsEnrichedStringBody() {
+    final StringBody content = new StringBody("this content");
+    Body body = Body.fromEntity(content, null, null);
+
+    assertThat(body.asString(), is("this content"));
+    assertThat(body.isBinary(), is(false));
+    assertThat(body.isJson(), is(false));
+  }
+
+  @Test
+  void responseBodyConstructsEnrichedBodyWithStringData() {
+    final EnrichedBody content =
+        new EnrichedBody(
+            EncodingType.TEXT,
+            FormatType.TEXT,
+            CompressionType.NONE,
+            "files",
+            "/path/to/my.data.json",
+            "My Response Data");
+    Body body = Body.fromEntity(content, null, null);
+
+    assertThat(body.asString(), is("My Response Data"));
+    assertThat(body.isBinary(), is(false));
+    assertThat(body.isJson(), is(false));
+  }
+
+  @Test
+  void responseBodyConstructsEnrichedBodyWithJsonData() {
+    var jsonMap = new HashMap<>();
+    jsonMap.put("name", "wiremock");
+    jsonMap.put("isCool", true);
+    final EnrichedBody content =
+        new EnrichedBody(
+            EncodingType.TEXT,
+            FormatType.TEXT,
+            CompressionType.NONE,
+            "files",
+            "/path/to/my.data.json",
+            jsonMap);
+    final JsonNode jsonContent = Json.node("{\"name\":\"wiremock\",\"isCool\":true}");
+
+    Body body = Body.fromEntity(content, null, null);
+
+    assertThat(body.isBinary(), is(false));
+    assertThat(body.isJson(), is(true));
     assertThat(body.asJson(), is(jsonContent));
   }
 

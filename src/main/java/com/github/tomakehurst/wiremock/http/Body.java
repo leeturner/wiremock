@@ -25,6 +25,7 @@ import com.github.tomakehurst.wiremock.common.ContentTypes;
 import com.github.tomakehurst.wiremock.common.Json;
 import com.github.tomakehurst.wiremock.common.Strings;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 public class Body {
@@ -61,16 +62,34 @@ public class Body {
     json = true;
   }
 
-  static Body fromResponseBody(ResponseBody responseBody) {
-    System.out.println(responseBody);
-    if (responseBody instanceof StringResponseBody) {
-      return Body.fromString(((StringResponseBody) responseBody).getValue());
-    } else if (responseBody instanceof EnrichedResponseBody) {
-      return Body.fromString(((EnrichedResponseBody) responseBody).getData());
+  public static Body fromEntity(Entity entity, JsonNode json, String base64) {
+    String bodyContent = null;
+    if (entity instanceof StringBody) {
+      bodyContent = ((StringBody) entity).getValue();
+    } else if (entity instanceof EnrichedBody) {
+      var enrichedBody = ((EnrichedBody) entity);
+      var data = enrichedBody.getData();
+      if (data != null) {
+        if (data instanceof String) {
+          if (enrichedBody.getEncoding() == EncodingType.BINARY) {
+            return Body.fromOneOf(((String) data).getBytes(), null, null, null);
+          }
+          bodyContent = (String) data;
+        } else if (data instanceof Map) {
+          if (enrichedBody.getEncoding() == EncodingType.BINARY) {
+            return Body.fromOneOf(
+                Json.write(data).getBytes(), null, null, null); 
+          } else {
+            return Body.fromJsonBytes(Json.write(data).getBytes());
+          }
+        } else {
+          return none();
+        }
+      }
     }
-    return Body.EMPTY_BODY;
+    return fromOneOf(null, bodyContent, json, base64);
   }
-  
+
   static Body fromBytes(byte[] bytes) {
     return bytes != null ? new Body(bytes) : none();
   }
