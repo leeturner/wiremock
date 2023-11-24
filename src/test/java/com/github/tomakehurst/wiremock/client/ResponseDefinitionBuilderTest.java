@@ -20,15 +20,23 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.tomakehurst.wiremock.common.Json;
+import com.github.tomakehurst.wiremock.http.CompressionType;
+import com.github.tomakehurst.wiremock.http.EncodingType;
+import com.github.tomakehurst.wiremock.http.EnrichedBody;
 import com.github.tomakehurst.wiremock.http.Fault;
+import com.github.tomakehurst.wiremock.http.FormatType;
 import com.github.tomakehurst.wiremock.http.HttpHeader;
 import com.github.tomakehurst.wiremock.http.HttpHeaders;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
+import com.github.tomakehurst.wiremock.http.StringBody;
 import org.junit.jupiter.api.Test;
 
 class ResponseDefinitionBuilderTest {
@@ -155,5 +163,93 @@ class ResponseDefinitionBuilderTest {
         proxyDefinition.getAdditionalProxyRequestHeaders(),
         equalTo(new HttpHeaders(List.of(new HttpHeader("header", "value")))));
     assertThat(proxyDefinition.getProxyUrlPrefixToRemove(), equalTo("/remove"));
+  }
+  
+  @Test
+  void withStringBodyEntityShouldUpdateTheCorrespondingBodyObject() {
+    ResponseDefinition responseDefinition =
+        ResponseDefinitionBuilder.responseDefinition()
+            .withEntity(new StringBody("some body"))
+            .build();
+    
+    var body = responseDefinition.getReponseBody();
+    
+    assertThat(body.isPresent(), is(true));
+    assertThat(body.asString(), equalTo("some body"));
+    assertThat(body.isJson(), is(false));
+    assertThat(body.isBinary(), is(false));
+  }
+  
+  @Test
+  void withEnrichedBodyTextNoCompressionEntityShouldUpdateTheCorrespondingBodyObject() {
+    var entity = new EnrichedBody(EncodingType.TEXT, FormatType.TEXT, CompressionType.NONE,null, null, "some body");
+    ResponseDefinition responseDefinition =
+            ResponseDefinitionBuilder.responseDefinition()
+                    .withEntity(entity)
+                    .build();
+    
+    var body = responseDefinition.getReponseBody();
+    
+    assertThat(body.isPresent(), is(true));
+    assertThat(body.asString(), equalTo("some body"));
+    assertThat(body.isJson(), is(false));
+    assertThat(body.isBinary(), is(false));
+  }
+  
+  @Test
+  void withEnrichedBodyJsonNoCompressionEntityShouldUpdateTheCorrespondingBodyObject() {
+    var jsonMap = new HashMap<String, Object>();
+    jsonMap.put("name", "wiremock");
+    jsonMap.put("isCool", true);
+    var json = Json.mapToObject(jsonMap, JsonNode.class);
+    var entity = new EnrichedBody(EncodingType.TEXT, FormatType.JSON, CompressionType.NONE,null, null, jsonMap);
+    ResponseDefinition responseDefinition =
+            ResponseDefinitionBuilder.responseDefinition()
+                    .withEntity(entity)
+                    .build();
+
+    var body = responseDefinition.getReponseBody();
+
+    assertThat(body.isPresent(), is(true));
+    assertThat(body.isJson(), is(true));
+    assertThat(body.isBinary(), is(false));
+    assertThat(body.asJson(), equalTo(json));
+  }
+  
+  @Test
+  void withEnrichedBodyBinaryNoCompressionEntityShouldUpdateTheCorrespondingBodyObject() {
+    var entity = new EnrichedBody(EncodingType.BINARY, FormatType.TEXT, CompressionType.NONE,null, null, "some body");
+    ResponseDefinition responseDefinition =
+            ResponseDefinitionBuilder.responseDefinition()
+                    .withEntity(entity)
+                    .build();
+
+    var body = responseDefinition.getReponseBody();
+
+    assertThat(body.isPresent(), is(true));
+    assertThat(body.asString(), equalTo("some body"));
+    assertThat(body.isJson(), is(false));
+    assertThat(body.isBinary(), is(true));
+  }
+  
+  @Test
+  void withEnrichedBinaryBodyJsonNoCompressionEntityShouldUpdateTheCorrespondingBodyObject() {
+    var jsonMap = new HashMap<String, Object>();
+    jsonMap.put("name", "wiremock");
+    jsonMap.put("isCool", true);
+    var json = Json.mapToObject(jsonMap, JsonNode.class);
+    var entity = new EnrichedBody(EncodingType.BINARY, FormatType.JSON, CompressionType.NONE,null, null, jsonMap);
+    ResponseDefinition responseDefinition =
+            ResponseDefinitionBuilder.responseDefinition()
+                    .withEntity(entity)
+                    .build();
+
+    var body = responseDefinition.getReponseBody();
+
+    // TODO: is this order of precedence correct? Should this be binary or json?
+    assertThat(body.isPresent(), is(true));
+    assertThat(body.isJson(), is(false));
+    assertThat(body.isBinary(), is(true));
+    assertThat(body.asJson(), equalTo(json));
   }
 }

@@ -18,7 +18,13 @@ package com.github.tomakehurst.wiremock.http;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static com.github.tomakehurst.wiremock.common.ContentTypes.CONTENT_TYPE;
 import static com.github.tomakehurst.wiremock.common.ContentTypes.LOCATION;
-import static java.net.HttpURLConnection.*;
+import static java.net.HttpURLConnection.HTTP_CREATED;
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,6 +45,7 @@ public class ResponseDefinition {
 
   private final int status;
   private final String statusMessage;
+  private final Entity entity;
   private final Body body;
   private final String bodyFileName;
   private final HttpHeaders headers;
@@ -56,47 +63,11 @@ public class ResponseDefinition {
   private Boolean wasConfigured = true;
   private Request originalRequest;
 
-  public ResponseDefinition(
-          int status,
-          String statusMessage,
-          String body,
-          JsonNode jsonBody,
-          String base64Body,
-          String bodyFileName,
-          HttpHeaders headers,
-          HttpHeaders additionalProxyRequestHeaders,
-          Integer fixedDelayMilliseconds,
-          DelayDistribution delayDistribution,
-          ChunkedDribbleDelay chunkedDribbleDelay,
-          String proxyBaseUrl,
-          String proxyUrlPrefixToRemove,
-          Fault fault,
-          List<String> transformers,
-          Parameters transformerParameters,
-          Boolean wasConfigured) {
-    this(
-        status,
-        statusMessage,
-        Body.fromOneOf(null, body, jsonBody, base64Body),
-        bodyFileName,
-        headers,
-        additionalProxyRequestHeaders,
-        fixedDelayMilliseconds,
-        delayDistribution,
-        chunkedDribbleDelay,
-        proxyBaseUrl,
-        proxyUrlPrefixToRemove,
-        fault,
-        transformers,
-        transformerParameters,
-        wasConfigured);
-  }
-  
   @JsonCreator
   public ResponseDefinition(
       @JsonProperty("status") int status,
       @JsonProperty("statusMessage") String statusMessage,
-      @JsonProperty("body") ResponseBody body,
+      @JsonProperty("body") Entity body,
       @JsonProperty("jsonBody") JsonNode jsonBody,
       @JsonProperty("base64Body") String base64Body,
       @JsonProperty("bodyFileName") String bodyFileName,
@@ -114,8 +85,44 @@ public class ResponseDefinition {
     this(
         status,
         statusMessage,
-        Body.fromResponseBody(body),
-//        Body.fromOneOf(null, body.toString(), jsonBody, base64Body),
+        body,
+        Body.fromEntity(body, jsonBody, base64Body),
+        bodyFileName,
+        headers,
+        additionalProxyRequestHeaders,
+        fixedDelayMilliseconds,
+        delayDistribution,
+        chunkedDribbleDelay,
+        proxyBaseUrl,
+        proxyUrlPrefixToRemove,
+        fault,
+        transformers,
+        transformerParameters,
+        wasConfigured);
+  }
+
+  public ResponseDefinition(
+      int status,
+      String statusMessage,
+      String body,
+      JsonNode jsonBody,
+      String base64Body,
+      String bodyFileName,
+      HttpHeaders headers,
+      HttpHeaders additionalProxyRequestHeaders,
+      Integer fixedDelayMilliseconds,
+      DelayDistribution delayDistribution,
+      ChunkedDribbleDelay chunkedDribbleDelay,
+      String proxyBaseUrl,
+      String proxyUrlPrefixToRemove,
+      Fault fault,
+      List<String> transformers,
+      Parameters transformerParameters,
+      Boolean wasConfigured) {
+    this(
+        status,
+        statusMessage,
+        Body.fromOneOf(null, body, jsonBody, base64Body),
         bodyFileName,
         headers,
         additionalProxyRequestHeaders,
@@ -182,9 +189,46 @@ public class ResponseDefinition {
       List<String> transformers,
       Parameters transformerParameters,
       Boolean wasConfigured) {
+    this(
+        status,
+        statusMessage,
+        null,
+        body,
+        bodyFileName,
+        headers,
+        additionalProxyRequestHeaders,
+        fixedDelayMilliseconds,
+        delayDistribution,
+        chunkedDribbleDelay,
+        proxyBaseUrl,
+        proxyUrlPrefixToRemove,
+        fault,
+        transformers,
+        transformerParameters,
+        wasConfigured);
+  }
+
+  public ResponseDefinition(
+      int status,
+      String statusMessage,
+      Entity entity,
+      Body body,
+      String bodyFileName,
+      HttpHeaders headers,
+      HttpHeaders additionalProxyRequestHeaders,
+      Integer fixedDelayMilliseconds,
+      DelayDistribution delayDistribution,
+      ChunkedDribbleDelay chunkedDribbleDelay,
+      String proxyBaseUrl,
+      String proxyUrlPrefixToRemove,
+      Fault fault,
+      List<String> transformers,
+      Parameters transformerParameters,
+      Boolean wasConfigured) {
     this.status = status > 0 ? status : 200;
     this.statusMessage = statusMessage;
 
+    this.entity = entity;
     this.body = body;
     this.bodyFileName = bodyFileName;
 
@@ -396,6 +440,16 @@ public class ResponseDefinition {
   @JsonIgnore
   public Body getReponseBody() {
     return body;
+  }
+
+  @JsonIgnore
+  public Entity getEntity() {
+    return entity;
+  }
+  
+  @JsonIgnore
+  public Entity getEnrichedBody() {
+    return entity;
   }
 
   public JsonNode getJsonBody() {

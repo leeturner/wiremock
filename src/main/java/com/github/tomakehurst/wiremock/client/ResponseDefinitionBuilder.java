@@ -33,6 +33,7 @@ public class ResponseDefinitionBuilder {
 
   protected int status = HTTP_OK;
   protected String statusMessage;
+  protected Entity entity;
   protected Body body = Body.none();
   protected String bodyFileName;
   protected List<HttpHeader> headers = new ArrayList<>();
@@ -126,6 +127,12 @@ public class ResponseDefinitionBuilder {
     return this;
   }
 
+  public ResponseDefinitionBuilder withEntity(Entity entity) {
+    this.entity = entity;
+    this.body = Body.fromEntity(entity, null, null);
+    return this;
+  }
+  
   public ResponseDefinitionBuilder withResponseBody(Body body) {
     this.body = body;
     return this;
